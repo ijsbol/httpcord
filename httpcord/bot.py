@@ -25,7 +25,7 @@ __all__: Final[tuple[str, ...]] = (
 
 DEFAULT_FASTAPI_KWARGS: Final[dict[str, Any]] = {
     "debug": False,
-    "title": "Discord HTTPBot - Python FastAPI gh:Isabe1le/pyhttpcord",
+    "title": "Discord HTTPBot - Python FastAPI https://git.uwu.gal/pyhttpcord",
     "openapi_url": None,
     "docs_url": None,
     "redoc_url": None,
@@ -42,7 +42,16 @@ ERROR_BAD_SIGNATURE_REQUEST: Final[JSONResponse] = JSONResponse(
 
 
 class HTTPBot:
-    __all__: Final[tuple[str, ...]] = ()
+    __slots__: Final[tuple[str, ...]] = (
+        "http",
+        "_token",
+        "_id",
+        "_public_key",
+        "_register_commands_on_startup",
+        "_fastapi",
+        "_commands",
+        "_uri_path",
+    )
 
     def __init__(
         self,

@@ -47,11 +47,17 @@ class User:
 
 
 class Interaction:
+    __slots__: Final[tuple[str, ...]] = (
+        "_data",
+        "user",
+    )
+
     def __init__(
         self,
         request: Request,
         data: dict[str, Any],
     ) -> None:
+        self._data = data
         self.user = User(
             id=int(data["member"]["user"]["id"]),
             username=data["member"]["user"]["username"],
@@ -64,6 +70,11 @@ class Interaction:
 
 
 class CommandResponse:
+    __slots__: Final[tuple[str, ...]] = (
+        "type",
+        "content",
+    )
+
     def __init__(self, type: InteractionResponseType, *, content: str) -> None:
         self.type = type
         self.content = content

@@ -1,6 +1,5 @@
-from httpcord.bot import HTTPBot
+from httpcord import HTTPBot, CommandResponse, Interaction
 from httpcord.enums import InteractionResponseType
-from httpcord.interaction import CommandResponse, Interaction
 
 
 CLIENT_ID = 0000000000000000000000

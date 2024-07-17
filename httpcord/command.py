@@ -26,7 +26,11 @@ class CommandDict(TypedDict):
 
 
 class Command:
-    __all__: Final[tuple[str, ...]] = ()
+    __slots__: Final[tuple[str, ...]] = (
+        "_func",
+        "_name",
+        "_description",
+    )
 
     def __init__(
         self,

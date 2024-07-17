@@ -8,6 +8,12 @@ from httpcord.command import CommandDict
 class Route:
     DISCORD_API_BASE: Final[str] = "https://discord.com/api/v10"
 
+    __slots__: Final[tuple[str, ...]] = (
+        "url",
+        "headers",
+        "json",
+    )
+
     def __init__(
         self,
         url: str,
@@ -21,6 +27,12 @@ class Route:
 
 
 class HTTP:
+    __slots__: Final[tuple[str, ...]] = (
+        "_token",
+        "_session",
+        "_headers",
+    )
+
     def __init__(self, token: str) -> None:
         self._token = token
         self._session = ClientSession()
