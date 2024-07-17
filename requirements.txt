@@ -1,0 +1,5 @@
+fastapi
+PyNaCl
+uvicorn
+aiohttp
+python-dateutil
