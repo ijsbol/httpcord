@@ -24,12 +24,26 @@ SOFTWARE.
 
 from typing import Final, TypedDict
 
-from httpcord.enums import InteractionResponseType
+from httpcord.enums import InteractionResponseType, InteractionOptionType
+from httpcord.interaction import User
 
 
 __all__: Final[tuple[str, ...]] = (
     "JSONResponseError",
 )
+
+
+TYPE_CONVERSION_TABLE: dict[type, InteractionOptionType] = {
+    bool: InteractionOptionType.BOOLEAN,
+    int: InteractionOptionType.INTEGER,
+    float: InteractionOptionType.NUMBER,
+    str: InteractionOptionType.STRING,
+    User: InteractionOptionType.USER,
+    # file: InteractionOptionType.ATTACHMENT,
+    # channel: InteractionOptionType.CHANNEL,
+    # mentionable: InteractionOptionType.MENTIONABLE,
+    # role: InteractionOptionType.ROLE,
+}
 
 
 class JSONResponseError(TypedDict):

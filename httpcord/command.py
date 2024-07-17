@@ -22,10 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typing import Final, TypedDict
+from typing import Any, Final, TypedDict
 
 from httpcord.func_protocol import CommandFunc
 from httpcord.interaction import CommandResponse, Interaction
+from httpcord.types import TYPE_CONVERSION_TABLE
 
 
 __all__: Final[tuple[str, ...]] = (
@@ -67,15 +68,25 @@ class Command:
         self._name: str = name
         self._description: str = description or "--"
 
-    async def invoke(self, interaction: Interaction) -> CommandResponse:
-        return await self._func(interaction)
+    async def invoke(self, interaction: Interaction, **kwargs: Any) -> CommandResponse:
+        return await self._func(interaction, **kwargs)
 
     def creation_dict(self) -> CommandDict:
+        raw_options = list(self._func.__annotations__.items())[1:-1]
+        options: list[CommandOptionsDict] = []
+        for raw_option in raw_options:
+            required = raw_option[0] not in self._func.__kwdefaults__.keys()
+            options.append(CommandOptionsDict(
+                name=raw_option[0],
+                description="...",
+                type=TYPE_CONVERSION_TABLE[raw_option[1]],
+                required=required,
+            ))
         return CommandDict(
             name=self._name,
             type=1,
             intergration_types=[0, 1],
             contexts=[0, 1, 2],
             description=self._description,
-            options=[],
+            options=options,
         )

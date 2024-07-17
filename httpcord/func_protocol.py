@@ -43,6 +43,7 @@ R = TypeVar('R', covariant=True)
 
 
 class CallabackProtocol(Protocol[P, R]):
+    __kwdefaults__: dict[str, str]
     __slots__: Final[tuple[str, ...]] = ()
 
     async def __call__(self, first: Interaction, *args: P.args, **kwargs: P.kwargs) -> R:

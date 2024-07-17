@@ -1,3 +1,5 @@
+import random
+
 from httpcord import HTTPBot, CommandResponse, Interaction
 from httpcord.enums import InteractionResponseType
 
@@ -20,5 +22,17 @@ async def hello_world(interaction: Interaction) -> CommandResponse:
         content=f"hello, {interaction.user.mention}! You joined this server at <t:{int(interaction.user.joined_at.timestamp())}:F>.",
     )
 
+@bot.command("guess-number")
+async def guess_number(interaction: Interaction, *, guess: int, max_value: int = 10) -> CommandResponse:
+    winning_number = random.randint(0, max_value)
+    if guess == winning_number:
+        return CommandResponse(
+            type=InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            content="Yay! You guessed the number correctly :)",
+        )
+    return CommandResponse(
+        type=InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        content="Aww, you got the number wrong. Better luck next time :)",
+    )
 
 bot.start(CLIENT_TOKEN)

@@ -165,7 +165,8 @@ class HTTPBot:
         command = self._commands.get(command_name, None)
         if command:
             interaction = await self.___create_interaction(request, data)
-            response = await command.invoke(interaction)
+            options = {arg['name']: arg['value'] for arg in data["data"]["options"]}
+            response = await command.invoke(interaction, **options)
             return JSONResponse(content=response.to_dict())
         raise UnknownCommand(f"Unknown command used: {command}")
 
