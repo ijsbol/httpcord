@@ -24,9 +24,10 @@ SOFTWARE.
 
 from typing import Any, Final, TypedDict
 
-from httpcord.func_protocol import CommandFunc
+from httpcord.enums import InteractionResponseType
+from httpcord.func_protocol import AutocompleteFunc, CommandFunc
 from httpcord.interaction import CommandResponse, Interaction
-from httpcord.types import TYPE_CONVERSION_TABLE
+from httpcord.types import TYPE_CONVERSION_TABLE, AutocompleteChoice
 
 
 __all__: Final[tuple[str, ...]] = (
@@ -39,6 +40,7 @@ class CommandOptionsDict(TypedDict):
     description: str
     type: int  # TODO: types
     required: bool
+    autocomplete: bool
 
 
 class CommandDict(TypedDict):
@@ -55,6 +57,7 @@ class Command:
         "_func",
         "_name",
         "_description",
+        "_autocompletes",
     )
 
     def __init__(
@@ -63,24 +66,27 @@ class Command:
         *,
         name: str,
         description: str | None = None,
+        autocompletes: dict[str, AutocompleteFunc] | None = None,
     ) -> None:
         self._func: CommandFunc = func
         self._name: str = name
         self._description: str = description or "--"
+        self._autocompletes: dict[str, AutocompleteFunc] = autocompletes or {}
 
     async def invoke(self, interaction: Interaction, **kwargs: Any) -> CommandResponse:
         return await self._func(interaction, **kwargs)
 
-    def creation_dict(self) -> CommandDict:
+    def to_dict(self) -> CommandDict:
         raw_options = list(self._func.__annotations__.items())[1:-1]
         options: list[CommandOptionsDict] = []
         for raw_option in raw_options:
-            required = raw_option[0] not in self._func.__kwdefaults__.keys()
+            required = raw_option[0] not in (getattr(self._func, "__kwdefaults__") or {}).keys()
             options.append(CommandOptionsDict(
                 name=raw_option[0],
                 description="...",
                 type=TYPE_CONVERSION_TABLE[raw_option[1]],
                 required=required,
+                autocomplete=raw_option[0] in self._autocompletes.keys(),
             ))
         return CommandDict(
             name=self._name,
@@ -90,3 +96,46 @@ class Command:
             description=self._description,
             options=options,
         )
+
+
+class CommandData:
+    __slots__: Final[tuple[str, ...]] = (
+        "command",
+        "options",
+        "options_formatted",
+        "interaction",
+    )
+
+    def __init__(
+        self,
+        command: Command,
+        options: list[dict[str, Any]],
+        interaction: Interaction,
+    ) -> None:
+        self.command: Command = command
+        self.options: dict[str, Any] = {o['name']: o for o in options}
+        self.options_formatted: dict[str, Any] = {o['name']: o['value'] for o in options}
+        self.interaction: Interaction = interaction
+
+
+class AutocompleteResponse:
+    __slotst__: Final[tuple[str, ...]] = (
+        "choices",
+    )
+
+    def __init__(self, choices: list[AutocompleteChoice]) -> None:
+        self.choices: list[AutocompleteChoice] = choices
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
+            "data": {
+                "choices": [
+                    {
+                        "name": choice["name"],
+                        "value": choice["value"],
+                    }
+                    for choice in self.choices
+                ][:25],
+            },
+        }

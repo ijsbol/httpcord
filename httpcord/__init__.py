@@ -34,5 +34,5 @@ __all__: Final[tuple[str, ...]] = (
     "Interaction",
 )
 
-__version__: Final[str] = "0.0.04"
+__version__: Final[str] = "0.0.5"
 __author__: Final[str] = "Isabelle Phoebe <izzy@uwu.gal>"

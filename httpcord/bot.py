@@ -32,10 +32,10 @@ from fastapi.responses import JSONResponse
 from nacl.signing import VerifyKey
 import uvicorn
 
-from httpcord.command import Command
+from httpcord.command import AutocompleteResponse, Command, CommandData
 from httpcord.enums import InteractionResponseType, InteractionType
 from httpcord.errors import UnknownCommand
-from httpcord.func_protocol import CommandFunc
+from httpcord.func_protocol import CommandFunc, AutocompleteFunc
 from httpcord.http import HTTP, Route
 from httpcord.interaction import Interaction
 
@@ -106,12 +106,19 @@ class HTTPBot:
             methods=["POST"],
         )
 
-    def command(self, name: str, *, description: str | None = None):
+    def command(
+        self,
+        name: str,
+        *,
+        description: str | None = None,
+        autocompletes: dict[str, AutocompleteFunc] | None = None,
+    ):
         def _decorator(func):
             self._commands[name] = Command(
                 func=func,
                 name=name,
                 description=description,
+                autocompletes=autocompletes,
             )
         return _decorator
 
@@ -155,20 +162,47 @@ class HTTPBot:
                     type=InteractionResponseType.PONG,
                 ),
             )
+        elif request_json['type'] == InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE:
+            return await self.__process_autocompletes(request, request_json)
         return await self.__process_commands(request, request_json)
 
     async def ___create_interaction(self, request: Request, data: dict[str, Any]) -> Interaction:
         return Interaction(request, data)
 
-    async def __process_commands(self, request: Request, data: dict[str, Any]) -> JSONResponse:
+    async def ___get_command_data(self, request: Request, data: dict[str, Any]) -> CommandData | None:
         command_name = data.get("data", {}).get("name", None)
         command = self._commands.get(command_name, None)
         if command:
             interaction = await self.___create_interaction(request, data)
-            options = {arg['name']: arg['value'] for arg in data["data"].get("options", [])}
+            return CommandData(
+                command=command,
+                options=data["data"].get("options", []),
+                interaction=interaction
+            )
+        return None
+
+    async def __process_commands(self, request: Request, data: dict[str, Any]) -> JSONResponse:
+        command_data = await self.___get_command_data(request, data)
+        if command_data:
+            command = command_data.command
+            interaction = command_data.interaction
+            options = command_data.options_formatted
             response = await command.invoke(interaction, **options)
             return JSONResponse(content=response.to_dict())
-        raise UnknownCommand(f"Unknown command used: {command}")
+        raise UnknownCommand(f"Unknown command used")
+
+    async def __process_autocompletes(self, request: Request, data: dict[str, Any]) -> JSONResponse:
+        command_data = await self.___get_command_data(request, data)
+        if command_data:
+            interaction = command_data.interaction
+            options = command_data.options
+            for option_name, option_data in options.items():
+                if option_data["focused"] == True:
+                    autocomplete_func = command_data.command._autocompletes[option_name]
+                    autocomplete_responses = await autocomplete_func(interaction, option_data["value"])
+                    response = AutocompleteResponse(choices=autocomplete_responses)
+                    return JSONResponse(content=response.to_dict())
+        raise UnknownCommand(f"Unknown autocomplete used")
 
     async def _interaction_http_callback(self, request: Request) -> JSONResponse:
         verified_signature = await self._verify_signature(request)
@@ -181,7 +215,7 @@ class HTTPBot:
         for _, command in self._commands.items():
             await self.http.post(Route(
                 f"/applications/{self._id}/commands",
-                json=command.creation_dict(),
+                json=command.to_dict(),
             ))
 
     async def _setup(self) -> None:

@@ -24,17 +24,22 @@ SOFTWARE.
 
 from typing import (
     Any,
+    Callable,
+    Coroutine,
     Final,
+    List,
     ParamSpec,
     Protocol,
     TypeVar,
 )
 
 from httpcord.interaction import CommandResponse, Interaction
+from httpcord.types import AutocompleteChoice
 
 
 __all__: Final[tuple[str, ...]] = (
     "CommandFunc",
+    "AutocompleteFunc",
 )
 
 
@@ -42,7 +47,7 @@ P = ParamSpec('P')
 R = TypeVar('R', covariant=True)
 
 
-class CallabackProtocol(Protocol[P, R]):
+class CommandCallabackProtocol(Protocol[P, R]):
     __kwdefaults__: dict[str, str]
     __slots__: Final[tuple[str, ...]] = ()
 
@@ -50,4 +55,13 @@ class CallabackProtocol(Protocol[P, R]):
         ...
 
 
-CommandFunc = CallabackProtocol[Any, CommandResponse]
+class AutocompleteCallabackProtocol(Protocol[P, R]):
+    __kwdefaults__: dict[str, str]
+    __slots__: Final[tuple[str, ...]] = ()
+
+    async def __call__(self, first: Interaction, current: str) -> R:
+        ...
+
+
+CommandFunc = CommandCallabackProtocol[Any, CommandResponse]
+AutocompleteFunc = Callable[[Interaction, str], Coroutine[Any, Any, List[AutocompleteChoice]]]

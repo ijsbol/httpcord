@@ -30,6 +30,7 @@ from httpcord.interaction import User
 
 __all__: Final[tuple[str, ...]] = (
     "JSONResponseError",
+    "AutocompleteChoice",
 )
 
 
@@ -52,3 +53,8 @@ class JSONResponseError(TypedDict):
 
 class JsonResponseType(TypedDict):
     type: InteractionResponseType
+
+
+class AutocompleteChoice(TypedDict):
+    name: str
+    value: str
