@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "httpcord"
-version = "0.0.03"
+version = "0.0.04"
 description = "A Python Discord Interaction bot API wrapper."
 authors = ["Isabelle Phoebe <izzy@uwu.gal>"]
 license = "MIT"
