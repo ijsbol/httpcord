@@ -3,7 +3,7 @@ A Python Discord Interaction bot API wrapper.
 
 ## `pip install --update httpcord`
 
-From `examples/hello-world.py`
+From `examples/*.py`
 ```py
 import random
 
