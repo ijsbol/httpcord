@@ -28,6 +28,7 @@ from typing import Any, Final
 from dateutil.parser import parse
 from fastapi import Request
 
+from httpcord.embed import Embed
 from httpcord.enums import InteractionResponseType
 
 
@@ -97,16 +98,25 @@ class CommandResponse:
     __slots__: Final[tuple[str, ...]] = (
         "type",
         "content",
+        "embeds",
     )
 
-    def __init__(self, type: InteractionResponseType, *, content: str) -> None:
-        self.type = type
-        self.content = content
+    def __init__(
+        self,
+        type: InteractionResponseType,
+        *,
+        content: str | None = None,
+        embeds: list[Embed] | None = None,
+    ) -> None:
+        self.type: InteractionResponseType = type
+        self.content: str | None = content
+        self.embeds: list[Embed] = embeds or []
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "type": self.type,
             "data": {
                 "content": self.content,
+                "embeds": [e.to_dict() for e in self.embeds],
             },
         }
