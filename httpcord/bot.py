@@ -167,7 +167,7 @@ class HTTPBot:
         return await self.__process_commands(request, request_json)
 
     async def ___create_interaction(self, request: Request, data: dict[str, Any]) -> Interaction:
-        return Interaction(request, data)
+        return Interaction(request, data, self)
 
     async def ___get_command_data(self, request: Request, data: dict[str, Any]) -> CommandData | None:
         command_name = data.get("data", {}).get("name", None)

@@ -23,13 +23,17 @@ SOFTWARE.
 """
 
 import datetime
-from typing import Any, Final
+from typing import TYPE_CHECKING, Any, Final
 
 from dateutil.parser import parse
 from fastapi import Request
 
 from httpcord.embed import Embed
 from httpcord.enums import InteractionResponseType
+from httpcord.http import Route
+
+if TYPE_CHECKING:
+    from httpcord.bot import HTTPBot
 
 
 __all__: Final[tuple[str, ...]] = (
@@ -75,13 +79,18 @@ class Interaction:
     __slots__: Final[tuple[str, ...]] = (
         "_data",
         "user",
+        "defered",
+        "responded",
+        "bot",
     )
 
     def __init__(
         self,
         request: Request,
         data: dict[str, Any],
+        bot: "HTTPBot",
     ) -> None:
+        self.bot: "HTTPBot" = bot
         self._data = data
         self.user = User(
             id=int(data["member"]["user"]["id"]),
@@ -91,6 +100,34 @@ class Interaction:
             nick=data["member"]["nick"],
             display_name=data["member"]["user"]["global_name"],
             discriminator=int(data["member"]["user"]["discriminator"]),
+        )
+        self.defered: bool = False
+        self.responded: bool = False
+
+    async def defer(self, *, with_message: bool = True) -> None:
+        deferral_type: InteractionResponseType = (
+            InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE
+            if with_message else InteractionResponseType.DEFERRED_UPDATE_MESSAGE
+        )
+        self.defered = True
+        await self.bot.http.post(
+            Route(
+                f"/interactions/{self._data['id']}/{self._data['token']}/callback",
+                json={
+                    "type": deferral_type,
+                },
+            ),
+            expect_return=False,
+        )
+
+    async def followup(self, response: "CommandResponse") -> None:
+        self.responded = True
+        await self.bot.http.post(
+            Route(
+                f"/webhooks/{self.bot._id}/{self._data['token']}",
+                json=response.to_dict()["data"],
+            ),
+            expect_return=False,
         )
 
 

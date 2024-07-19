@@ -22,10 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typing import Any, Final
+from typing import TYPE_CHECKING, Any, Final, Literal, Union, overload
 
 from aiohttp import ClientSession
-from httpcord.command import CommandDict
+
+if TYPE_CHECKING:
+    from httpcord.command import CommandDict
 
 
 class Route:
@@ -42,7 +44,7 @@ class Route:
         url: str,
         *,
         headers: dict[str, Any] | None = None,
-        json: dict[str, Any] | CommandDict | None = None,
+        json: Union[dict[str, Any], "CommandDict", None] = None,
     ) -> None:
         self.url = Route.DISCORD_API_BASE + url
         self.headers = headers or {}
@@ -65,11 +67,20 @@ class HTTP:
             "User-Agent": "HTTPCord / Python - https://git.uwu.gal/pyhttpcord",
         }
 
-    async def post(self, route: Route) -> dict[str, Any]:
+    @overload
+    async def post(self, route: Route, expect_return: Literal[True] = True) -> dict[str, Any]:
+        ...
+
+    @overload
+    async def post(self, route: Route, expect_return: Literal[False] = False) -> None:
+        ...
+
+    async def post(self, route: Route, expect_return: bool = True) -> dict[str, Any] | None:
         route.headers.update(self._headers)
         resp = await self._session.post(
             url=route.url,
             json=route.json,
             headers=route.headers,
         )
-        return await resp.json()
+        if expect_return:
+            return await resp.json()
