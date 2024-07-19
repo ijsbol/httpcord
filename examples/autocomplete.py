@@ -1,3 +1,4 @@
+from typing import Final
 from httpcord import HTTPBot, CommandResponse, Interaction
 from httpcord.embed import Embed
 from httpcord.enums import InteractionResponseType
@@ -15,8 +16,20 @@ bot = HTTPBot(
     register_commands_on_startup=True,
 )
 
+ANIMALS: Final[list[str]] = [
+    "dog",
+    "cat",
+    "giraffe",
+    "wolf",
+    "parrot",
+    "axolotl",
+]
+
 async def string_autocomplete(interaction: Interaction, current: str) -> list[AutocompleteChoice]:
-    return [AutocompleteChoice(name=f"this is an autocomplete: {current}", value=current)]
+    return [
+        AutocompleteChoice(name=animal, value=animal)
+        for animal in ANIMALS if current.lower() in animal
+    ]
 
 @bot.command(
     name="autocomplete",

@@ -56,8 +56,20 @@ async def embed(interaction: Interaction) -> CommandResponse:
         embeds=[embed],
     )
 
+ANIMALS: list[str] = [
+    "dog",
+    "cat",
+    "giraffe",
+    "wolf",
+    "parrot",
+    "axolotl",
+]
+
 async def string_autocomplete(interaction: Interaction, current: str) -> list[AutocompleteChoice]:
-    return [AutocompleteChoice(name=f"this is an autocomplete: {current}", value=current)]
+    return [
+        AutocompleteChoice(name=animal, value=animal)
+        for animal in ANIMALS if current.lower() in animal
+    ]
 
 @bot.command(
     name="autocomplete",
