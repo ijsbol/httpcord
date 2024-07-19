@@ -24,6 +24,7 @@ SOFTWARE.
 
 from __future__ import annotations
 
+import enum
 from http import HTTPStatus
 from typing import Any, Final
 
@@ -187,6 +188,11 @@ class HTTPBot:
             command = command_data.command
             interaction = command_data.interaction
             options = command_data.options_formatted
+            for option_name in options.keys():
+                kwarg_type = command._func.__annotations__[option_name]
+                option_value = options[option_name]
+                if kwarg_type.__class__ == enum.EnumType:
+                    options[option_name] = kwarg_type(option_value)
             response = await command.invoke(interaction, **options)
             return JSONResponse(content=response.to_dict())
         raise UnknownCommand(f"Unknown command used")

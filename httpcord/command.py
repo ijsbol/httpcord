@@ -22,12 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import enum
 from typing import Any, Final, TypedDict
 
 from httpcord.enums import InteractionResponseType
 from httpcord.func_protocol import AutocompleteFunc, CommandFunc
 from httpcord.interaction import CommandResponse, Interaction
-from httpcord.types import TYPE_CONVERSION_TABLE, AutocompleteChoice
+from httpcord.types import TYPE_CONVERSION_TABLE, Choice
 
 
 __all__: Final[tuple[str, ...]] = (
@@ -41,6 +42,7 @@ class CommandOptionsDict(TypedDict):
     type: int  # TODO: types
     required: bool
     autocomplete: bool
+    choices: list[Choice]
 
 
 class CommandDict(TypedDict):
@@ -81,12 +83,21 @@ class Command:
         options: list[CommandOptionsDict] = []
         for raw_option in raw_options:
             required = raw_option[0] not in (getattr(self._func, "__kwdefaults__") or {}).keys()
+            option_type = raw_option[1]
+            choices: list[Choice] = []
+            if option_type.__class__ == enum.EnumType:
+                choices: list[Choice] = [
+                    Choice(name=k, value=v.value)
+                    for k, v in option_type.__members__.items()
+                ]
+                option_type = option_type.__base__.__bases__[0]
             options.append(CommandOptionsDict(
                 name=raw_option[0],
                 description="...",
-                type=TYPE_CONVERSION_TABLE[raw_option[1]],
+                type=TYPE_CONVERSION_TABLE[option_type],
                 required=required,
                 autocomplete=raw_option[0] in self._autocompletes.keys(),
+                choices=choices,
             ))
         return CommandDict(
             name=self._name,
@@ -123,8 +134,8 @@ class AutocompleteResponse:
         "choices",
     )
 
-    def __init__(self, choices: list[AutocompleteChoice]) -> None:
-        self.choices: list[AutocompleteChoice] = choices
+    def __init__(self, choices: list[Choice]) -> None:
+        self.choices: list[Choice] = choices
 
     def to_dict(self) -> dict[str, Any]:
         return {

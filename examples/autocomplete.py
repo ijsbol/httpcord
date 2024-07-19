@@ -2,7 +2,7 @@ from typing import Final
 from httpcord import HTTPBot, CommandResponse, Interaction
 from httpcord.embed import Embed
 from httpcord.enums import InteractionResponseType
-from httpcord.types import AutocompleteChoice
+from httpcord.types import Choice
 
 
 CLIENT_ID = 0000000000000000000000
@@ -25,9 +25,9 @@ ANIMALS: Final[list[str]] = [
     "axolotl",
 ]
 
-async def string_autocomplete(interaction: Interaction, current: str) -> list[AutocompleteChoice]:
+async def string_autocomplete(interaction: Interaction, current: str) -> list[Choice]:
     return [
-        AutocompleteChoice(name=animal, value=animal)
+        Choice(name=animal, value=animal)
         for animal in ANIMALS if current.lower() in animal
     ]
 

@@ -5,6 +5,7 @@ A Python Discord Interaction bot API wrapper.
 
 From `examples/*.py`
 ```py
+from enum import StrEnum
 import random
 
 from httpcord import HTTPBot, CommandResponse, Interaction
@@ -99,6 +100,19 @@ async def defer_me(interaction: Interaction) -> CommandResponse:
 
     # You can return another followup message, or just a PONG if you want to do nothing else.
     return CommandResponse(InteractionResponseType.PONG)
+
+class Fruits(StrEnum):
+    apples = "apples"
+    cherries = "cherries"
+    kiwis = "kiwis"
+    oranges = "oranges"
+
+@bot.command("pick")
+async def pick(interaction: Interaction, *, fruit: Fruits) -> CommandResponse:
+    return CommandResponse(
+        InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        content=f"You picked: {fruit.value}!",
+    )
 
 bot.start(CLIENT_TOKEN)
 ```

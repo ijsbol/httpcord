@@ -34,7 +34,7 @@ from typing import (
 )
 
 from httpcord.interaction import CommandResponse, Interaction
-from httpcord.types import AutocompleteChoice
+from httpcord.types import Choice
 
 
 __all__: Final[tuple[str, ...]] = (
@@ -64,4 +64,4 @@ class AutocompleteCallabackProtocol(Protocol[P, R]):
 
 
 CommandFunc = CommandCallabackProtocol[Any, CommandResponse]
-AutocompleteFunc = Callable[[Interaction, str], Coroutine[Any, Any, List[AutocompleteChoice]]]
+AutocompleteFunc = Callable[[Interaction, str], Coroutine[Any, Any, List[Choice]]]
