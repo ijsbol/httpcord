@@ -90,7 +90,7 @@ class Command:
             choices: list[Choice] = []
             if option_type.__class__ == enum.EnumType:
                 choices: list[Choice] = [
-                    Choice(name=k, value=v.value)
+                    Choice(name=v.value, value=k)
                     for k, v in option_type.__members__.items()
                 ]
                 option_type = option_type.__base__.__bases__[0]

@@ -194,7 +194,7 @@ class HTTPBot:
                 kwarg_type = command._func.__annotations__[option_name]
                 option_value = options[option_name]
                 if kwarg_type.__class__ == enum.EnumType:
-                    options[option_name] = kwarg_type(option_value)
+                    options[option_name] = getattr(kwarg_type, option_value)
             if command._auto_defer:
                 await interaction.defer()
             response = await command.invoke(interaction, **options)
