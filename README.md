@@ -5,6 +5,7 @@ A Python Discord Interaction bot API wrapper.
 
 From `examples/*.py`
 ```py
+import asyncio
 from enum import StrEnum
 import random
 
@@ -89,6 +90,7 @@ async def autocomplete_command(interaction: Interaction, *, string: str) -> Comm
 @bot.command("defer-me")
 async def defer_me(interaction: Interaction) -> CommandResponse:
     await interaction.defer()
+    await asyncio.sleep(3)
     await interaction.followup(CommandResponse(
         type=InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         content=f"Deferred message.",
@@ -99,6 +101,15 @@ async def defer_me(interaction: Interaction) -> CommandResponse:
     ))
 
     # You can return another followup message, or just a PONG if you want to do nothing else.
+    return CommandResponse(InteractionResponseType.PONG)
+
+@bot.command("hello-world-deferred", auto_defer=True)
+async def hello_world_long(interaction: Interaction) -> CommandResponse:
+    await asyncio.sleep(3)
+    await interaction.followup(CommandResponse(
+        type=InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
+        content=f"Hello, {interaction.user.mention}!",
+    ))
     return CommandResponse(InteractionResponseType.PONG)
 
 class Fruits(StrEnum):

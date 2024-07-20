@@ -60,6 +60,7 @@ class Command:
         "_name",
         "_description",
         "_autocompletes",
+        "_auto_defer",
     )
 
     def __init__(
@@ -69,11 +70,13 @@ class Command:
         name: str,
         description: str | None = None,
         autocompletes: dict[str, AutocompleteFunc] | None = None,
+        auto_defer: bool = False,
     ) -> None:
         self._func: CommandFunc = func
         self._name: str = name
         self._description: str = description or "--"
         self._autocompletes: dict[str, AutocompleteFunc] = autocompletes or {}
+        self._auto_defer: bool = auto_defer
 
     async def invoke(self, interaction: Interaction, **kwargs: Any) -> CommandResponse:
         return await self._func(interaction, **kwargs)

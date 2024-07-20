@@ -113,6 +113,7 @@ class HTTPBot:
         *,
         description: str | None = None,
         autocompletes: dict[str, AutocompleteFunc] | None = None,
+        auto_defer: bool = False,
     ):
         def _decorator(func):
             self._commands[name] = Command(
@@ -120,6 +121,7 @@ class HTTPBot:
                 name=name,
                 description=description,
                 autocompletes=autocompletes,
+                auto_defer=auto_defer,
             )
         return _decorator
 
@@ -193,6 +195,8 @@ class HTTPBot:
                 option_value = options[option_name]
                 if kwarg_type.__class__ == enum.EnumType:
                     options[option_name] = kwarg_type(option_value)
+            if command._auto_defer:
+                await interaction.defer()
             response = await command.invoke(interaction, **options)
             return JSONResponse(content=response.to_dict())
         raise UnknownCommand(f"Unknown command used")
