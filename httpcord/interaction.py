@@ -29,7 +29,7 @@ from dateutil.parser import parse
 from fastapi import Request
 
 from httpcord.embed import Embed
-from httpcord.enums import InteractionResponseType
+from httpcord.enums import InteractionResponseType, InteractionResponseFlags
 from httpcord.http import Route
 
 if TYPE_CHECKING:
@@ -104,7 +104,7 @@ class Interaction:
         self.defered: bool = False
         self.responded: bool = False
 
-    async def defer(self, *, with_message: bool = True) -> None:
+    async def defer(self, *, with_message: bool = True, ephemeral: bool = False) -> None:
         deferral_type: InteractionResponseType = (
             InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE
             if with_message else InteractionResponseType.DEFERRED_UPDATE_MESSAGE
@@ -115,6 +115,9 @@ class Interaction:
                 f"/interactions/{self._data['id']}/{self._data['token']}/callback",
                 json={
                     "type": deferral_type,
+                    "data": {
+                        "flags": InteractionResponseFlags.EPHEMERAL if ephemeral else None,
+                    },
                 },
             ),
             expect_return=False,
@@ -136,6 +139,7 @@ class CommandResponse:
         "type",
         "content",
         "embeds",
+        "flags",
     )
 
     def __init__(
@@ -144,15 +148,18 @@ class CommandResponse:
         *,
         content: str | None = None,
         embeds: list[Embed] | None = None,
+        ephemeral: bool = False,
     ) -> None:
         self.type: InteractionResponseType = type
         self.content: str | None = content
         self.embeds: list[Embed] = embeds or []
+        self.flags = InteractionResponseFlags.EPHEMERAL if ephemeral else None
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "type": self.type,
             "data": {
+                "flags": self.flags,
                 "content": self.content,
                 "embeds": [e.to_dict() for e in self.embeds],
             },

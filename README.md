@@ -33,6 +33,14 @@ async def hello_world(interaction: Interaction) -> CommandResponse:
         content=f"hello, {interaction.user.mention}! You joined this server at <t:{int(interaction.user.joined_at.timestamp())}:F>.",
     )
 
+@bot.command("ephemeral")
+async def ephemeral(interaction: Interaction) -> CommandResponse:
+    return CommandResponse(
+        type=InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        content="Hello!",
+        ephemeral=True,
+    )
+
 @bot.command("guess-number")
 async def guess_number(interaction: Interaction, *, guess: int, max_value: int = 10) -> CommandResponse:
     winning_number = random.randint(0, max_value)
