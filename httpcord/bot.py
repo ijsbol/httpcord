@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import enum
 from http import HTTPStatus
-from typing import Any, Final
+from typing import Any, Callable, Coroutine, Final
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -76,6 +76,8 @@ class HTTPBot:
         "_fastapi",
         "_commands",
         "_uri_path",
+        "_on_startup",
+        "_on_shutdown",
     )
 
     def __init__(
@@ -85,18 +87,23 @@ class HTTPBot:
         client_public_key: str,
         register_commands_on_startup: bool = False,
         uri_path: str = "/api/interactions",
+        on_startup: Callable[[], Coroutine[Any, Any, None]] | None = None,
+        on_shutdown: Callable[[], Coroutine[Any, Any, None]] | None = None,
         **kwargs: Any,
     ) -> None:
         """ Create an HTTPBot client. """
         self.http: HTTP
         self._token: str
         self._id: Final[int] = client_id
+        self._on_startup: Callable[[], Coroutine[Any, Any, None]] | None = on_startup
+        self._on_shutdown: Callable[[], Coroutine[Any, Any, None]] | None = on_shutdown
         self._public_key: Final[str] = client_public_key
         self._register_commands_on_startup = register_commands_on_startup
         self._fastapi = FastAPI(
             **DEFAULT_FASTAPI_KWARGS,
             **kwargs,
             on_startup=[self._setup],
+            on_shutdown=[self._shutdown],
         )
         self._commands: dict[str, Command] = {}
         self._uri_path: str = uri_path
@@ -232,6 +239,12 @@ class HTTPBot:
         self.http = HTTP(token=self._token)
         if self._register_commands_on_startup:
             await self.register_commands()
+        if self._on_startup is not None:
+            await self._on_startup()
+
+    async def _shutdown(self) -> None:
+        if self._on_shutdown is not None:
+            await self._on_shutdown()
 
     def start(self, token: str, **kwargs: Any) -> None:
         self._token = token

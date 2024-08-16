@@ -23,6 +23,7 @@ SOFTWARE.
 """
 
 import enum
+import types
 from typing import Any, Final, TypedDict
 
 from httpcord.enums import InteractionResponseType
@@ -94,6 +95,13 @@ class Command:
                     for k, v in option_type.__members__.items()
                 ]
                 option_type = option_type.__base__.__bases__[0]
+            if type(raw_option[1]) == types.UnionType:
+                option_types = raw_option[1].__args__
+                for _option_type in option_types:
+                    if _option_type in TYPE_CONVERSION_TABLE.keys():
+                        option_type = _option_type
+            if option_type not in TYPE_CONVERSION_TABLE.keys():
+                option_type = str
             options.append(CommandOptionsDict(
                 name=raw_option[0],
                 description="...",
