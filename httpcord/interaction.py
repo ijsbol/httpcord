@@ -57,16 +57,16 @@ class User:
         id: int,
         username: str,
         role_ids: list[int],
-        joined_at: datetime.datetime,
-        nick: str,
+        joined_at: datetime.datetime | None,
+        nick: str | None,
         display_name: str,
         discriminator: int,
     ) -> None:
         self.id: int = id
         self.username: str = username
         self.role_ids: list[int] = role_ids
-        self.joined_at: datetime.datetime = joined_at
-        self.nick: str = nick
+        self.joined_at: datetime.datetime | None = joined_at
+        self.nick: str | None = nick
         self.display_name: str = display_name
         self.discriminator: int = discriminator
 
@@ -92,14 +92,24 @@ class Interaction:
     ) -> None:
         self.bot: "HTTPBot" = bot
         self._data = data
+        if data.get("member", None) is not None:
+            userinfo = data["member"]["user"]
+            role_ids = [int(_id) for _id in data["member"]["roles"]]
+            nick = data["member"]["nick"]
+            joinede_at = parse(data["member"]["joined_at"])
+        else:
+            userinfo = data["user"]
+            role_ids = []
+            nick = None
+            joined_at = None
         self.user = User(
-            id=int(data["member"]["user"]["id"]),
-            username=data["member"]["user"]["username"],
-            role_ids=[int(_id) for _id in data["member"]["roles"]],
-            joined_at=parse(data["member"]["joined_at"]),
-            nick=data["member"]["nick"],
-            display_name=data["member"]["user"]["global_name"],
-            discriminator=int(data["member"]["user"]["discriminator"]),
+            id=int(userinfo["id"]),
+            username=userinfo["username"],
+            role_ids=role_ids,
+            joined_at=joined_at,
+            nick=nick,
+            display_name=userinfo["global_name"],
+            discriminator=int(userinfo["discriminator"]),
         )
         self.defered: bool = False
         self.responded: bool = False
