@@ -214,7 +214,7 @@ class HTTPBot:
             interaction = command_data.interaction
             options = command_data.options
             for option_name, option_data in options.items():
-                if option_data["focused"] == True:
+                if option_data.get("focused", False) == True:
                     autocomplete_func = command_data.command._autocompletes[option_name]
                     autocomplete_responses = await autocomplete_func(interaction, option_data["value"])
                     response = AutocompleteResponse(choices=autocomplete_responses)
