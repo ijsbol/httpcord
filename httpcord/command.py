@@ -49,7 +49,7 @@ class CommandOptionsDict(TypedDict):
 class CommandDict(TypedDict):
     name: str
     type: int  # TODO: types
-    intergration_types: list[int]  # TODO: types
+    integration_types: list[int]  # TODO: types
     contexts: list[int]  # TODO: types
     description: str
     options: list[CommandOptionsDict]
@@ -104,7 +104,7 @@ class Command:
                 option_type = str
             options.append(CommandOptionsDict(
                 name=raw_option[0],
-                description="...",
+                description=self._description,
                 type=TYPE_CONVERSION_TABLE[option_type],
                 required=required,
                 autocomplete=raw_option[0] in self._autocompletes.keys(),
@@ -113,7 +113,7 @@ class Command:
         return CommandDict(
             name=self._name,
             type=1,
-            intergration_types=[0, 1],
+            integration_types=[0, 1],
             contexts=[0, 1, 2],
             description=self._description,
             options=options,
