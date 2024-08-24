@@ -43,6 +43,7 @@ class CommandOptionsDict(TypedDict):
     type: int  # TODO: types
     required: bool
     autocomplete: bool
+    options: list[Choice]
     choices: list[Choice]
 
 
@@ -89,17 +90,14 @@ class Command:
             required = raw_option[0] not in (getattr(self._func, "__kwdefaults__") or {}).keys()
             option_type = raw_option[1]
             choices: list[Choice] = []
+            if type(raw_option[1]) == types.UnionType:
+                option_type = raw_option[1].__args__[0]
             if option_type.__class__ == enum.EnumType:
                 choices: list[Choice] = [
                     Choice(name=v.value, value=k)
                     for k, v in option_type.__members__.items()
                 ]
                 option_type = option_type.__base__.__bases__[0]
-            if type(raw_option[1]) == types.UnionType:
-                option_types = raw_option[1].__args__
-                for _option_type in option_types:
-                    if _option_type in TYPE_CONVERSION_TABLE.keys():
-                        option_type = _option_type
             if option_type not in TYPE_CONVERSION_TABLE.keys():
                 option_type = str
             options.append(CommandOptionsDict(
@@ -108,6 +106,7 @@ class Command:
                 type=TYPE_CONVERSION_TABLE[option_type],
                 required=required,
                 autocomplete=raw_option[0] in self._autocompletes.keys(),
+                options=choices,
                 choices=choices,
             ))
         return CommandDict(
