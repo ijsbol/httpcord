@@ -96,7 +96,7 @@ class Interaction:
             userinfo = data["member"]["user"]
             role_ids = [int(_id) for _id in data["member"]["roles"]]
             nick = data["member"]["nick"]
-            joinede_at = parse(data["member"]["joined_at"])
+            joined_at = parse(data["member"]["joined_at"])
         else:
             userinfo = data["user"]
             role_ids = []
