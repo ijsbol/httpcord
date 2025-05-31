@@ -38,6 +38,7 @@ __all__: Final[tuple[str, ...]] = (
 
 
 class ApplicationCommandType(IntEnum):
+    '''Enum for different types of application commands in Discord interactions.'''
     CHAT_INPUT = 1
     USER = 2
     MESSAGE = 3
@@ -45,6 +46,7 @@ class ApplicationCommandType(IntEnum):
 
 
 class InteractionType(IntEnum):
+    '''Enum for types of interactions received from Discord.'''
     PING = 1
     APPLICATION_COMMAND = 2
     MESSAGE_COMPONENT = 3
@@ -53,26 +55,30 @@ class InteractionType(IntEnum):
 
 
 class InteractionContextType(IntEnum):
+    '''Enum for contexts in which interactions can occur.'''
     GUILD = 0
     BOT_DM = 1
     PRIVATE_CHANNEL = 2
 
 
 class InteractionResponseType(IntEnum):
+    '''Enum for types of responses to interactions.'''
     PONG = 1
     CHANNEL_MESSAGE_WITH_SOURCE = 4
     DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE = 5
     DEFERRED_UPDATE_MESSAGE = 6
-    UPDATE_MESSAGE =  7
+    UPDATE_MESSAGE = 7
     APPLICATION_COMMAND_AUTOCOMPLETE_RESULT = 8
     MODAL = 9
 
 
 class InteractionResponseFlags(IntEnum):
+    '''Enum for flags used in interaction responses, such as making them ephemeral.'''
     EPHEMERAL = 1 << 6
 
 
 class ApplicationCommandOptionType(IntEnum):
+    '''Enum for types of options in application commands.'''
     SUB_COMMAND = 1
     SUB_COMMAND_GROUP = 2
     STRING = 3
@@ -87,5 +93,6 @@ class ApplicationCommandOptionType(IntEnum):
 
 
 class ApplicationIntegrationType(IntEnum):
+    '''Enum for types of application integrations.'''
     GUILD_INSTALL = 0
     USER_INSTALL = 1

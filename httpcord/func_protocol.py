@@ -48,6 +48,7 @@ R = TypeVar('R', covariant=True)
 
 
 class CommandCallabackProtocol(Protocol[P, R]):
+    '''Protocol for command callback functions, defining the signature for functions that handle interactions and return a CommandResponse.'''
     __kwdefaults__: dict[str, str]
     __slots__: Final[tuple[str, ...]] = ()
 
@@ -56,6 +57,7 @@ class CommandCallabackProtocol(Protocol[P, R]):
 
 
 class AutocompleteCallabackProtocol(Protocol[P, R]):
+    '''Protocol for autocomplete callback functions, defining the signature for functions that handle autocomplete queries and return choices.'''
     __kwdefaults__: dict[str, str]
     __slots__: Final[tuple[str, ...]] = ()
 
@@ -63,5 +65,8 @@ class AutocompleteCallabackProtocol(Protocol[P, R]):
         ...
 
 
+'''Type alias for command functions, representing asynchronous functions that take an interaction and return a CommandResponse.'''
 CommandFunc = CommandCallabackProtocol[Any, CommandResponse]
+
+'''Type alias for autocomplete functions, representing asynchronous functions that take an interaction and a string, returning a list of choices.'''
 AutocompleteFunc = Callable[[Interaction, str], Coroutine[Any, Any, List[Choice]]]
