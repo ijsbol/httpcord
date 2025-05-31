@@ -32,6 +32,7 @@ from typing import (
 )
 
 from aiohttp import ClientSession
+import aiohttp  # Ensure aiohttp is imported for exceptions and timeout
 
 
 class Route:
@@ -64,7 +65,7 @@ class HTTP:
 
     def __init__(self, token: str) -> None:
         self._token = token
-        self._session = ClientSession()
+        self._session = ClientSession(timeout=aiohttp.ClientTimeout(total=30))  # Add a 30-second timeout
         self._headers: dict[str, str] = {
             "Authorization": f"Bot {self._token}",
             "Content-Type": "application/json",
@@ -90,24 +91,32 @@ class HTTP:
 
 
     async def post(self, route: Route, expect_return: bool = True) -> dict[str, Any] | None:
-        route.headers.update(self._headers)
-        resp = await self._session.post(
-            url=route.url,
-            json=route.json,
-            headers=route.headers,
-        )
-
-        if expect_return:
-            return await resp.json()
+        try:
+            route.headers.update(self._headers)
+            resp = await self._session.post(
+                url=route.url,
+                json=route.json,
+                headers=route.headers,
+            )
+            if expect_return:
+                return await resp.json()
+        except aiohttp.ClientError as e:  # Catch network-related errors
+            raise RuntimeError(f'POST request failed: {e}')  # Raise with context for better handling
+        except Exception as e:
+            raise RuntimeError(f'Unexpected error in POST: {e}')
 
 
     async def put(self, route: Route, expect_return: bool = True) -> dict[str, Any] | None:
-        route.headers.update(self._headers)
-        resp = await self._session.put(
-            url=route.url,
-            json=route.json,
-            headers=route.headers,
-        )
-
-        if expect_return:
-            return await resp.json()
+        try:
+            route.headers.update(self._headers)
+            resp = await self._session.put(
+                url=route.url,
+                json=route.json,
+                headers=route.headers,
+            )
+            if expect_return:
+                return await resp.json()
+        except aiohttp.ClientError as e:  # Catch network-related errors
+            raise RuntimeError(f'PUT request failed: {e}')  # Raise with context for better handling
+        except Exception as e:
+            raise RuntimeError(f'Unexpected error in PUT: {e}')

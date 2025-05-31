@@ -136,23 +136,29 @@ class Interaction:
                 },
             })
 
-        await self.bot.http.post(
-            Route(
-                f"/interactions/{self._data['id']}/{self._data['token']}/callback",
-                json=payload,
-            ),
-            expect_return=False,
-        )
+        try:
+            await self.bot.http.post(
+                Route(
+                    f"/interactions/{self._data['id']}/{self._data['token']}/callback",
+                    json=payload,
+                ),
+                expect_return=False,
+            )
+        except Exception as e:
+            raise RuntimeError(f'Failed to defer interaction: {e}')
 
     async def followup(self, response: "CommandResponse") -> None:
         self.responded = True
-        await self.bot.http.post(
-            Route(
-                f"/webhooks/{self.bot._id}/{self._data['token']}",
-                json=response.to_dict()["data"],
-            ),
-            expect_return=False,
-        )
+        try:
+            await self.bot.http.post(
+                Route(
+                    f"/webhooks/{self.bot._id}/{self._data['token']}",
+                    json=response.to_dict()["data"],
+                ),
+                expect_return=False,
+            )
+        except Exception as e:
+            raise RuntimeError(f'Failed to send followup: {e}')
 
 
 class CommandResponse:

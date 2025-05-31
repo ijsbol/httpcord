@@ -32,7 +32,9 @@ __all__: Final[tuple[str, ...]] = (
 
 
 class HTTPCordException(Exception):
+    '''Base exception class for HTTPCord-related errors. This should be the base for all custom exceptions in the library.'''
     pass
 
 class UnknownCommand(HTTPCordException):
+    '''Exception raised when an unknown command is encountered. This helps in handling cases where a command is not found in the system.'''
     pass

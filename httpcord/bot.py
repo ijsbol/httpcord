@@ -40,6 +40,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from nacl.signing import VerifyKey
+import logging  # Import logging here for local use
 
 from httpcord.command import (
     AutocompleteResponse,
@@ -205,7 +206,7 @@ class HTTPBot:
                 allowed_contexts=set(allowed_contexts) if allowed_contexts else None,
                 integration_types=set(integration_types) if integration_types else None,
                 description=description,
-                command_type=command_type,  # pyright: ignore[reportCallIssue, reportArgumentType]
+                command_type=command_type,  # pyright: ignore[reportCallIssue, reportArgumentType]
                 autocompletes=autocompletes,
                 auto_defer=auto_defer,
                 name_localisations=name_localisations,
@@ -224,18 +225,18 @@ class HTTPBot:
     async def _verify_signature(self, request: Request) -> bool:
         signature: str | None = request.headers.get('X-Signature-Ed25519')
         timestamp: str | None = request.headers.get('X-Signature-Timestamp')
-        if (
-            signature is None
-            or timestamp is None
-        ):
+        if signature is None or timestamp is None:
             return False
-        else:
-            message = timestamp.encode() + await request.body()
-            try:
-                vk = VerifyKey(bytes.fromhex(self._public_key))
-                vk.verify(message, bytes.fromhex(signature))
-            except Exception:
-                return False
+        message = timestamp.encode() + await request.body()
+        try:
+            vk = VerifyKey(bytes.fromhex(self._public_key))
+            vk.verify(message, bytes.fromhex(signature))
+        except ValueError as e:
+            logging.error(f"Verification error: {e}")  # Use logging.error instead of print
+            return False
+        except Exception as e:
+            logging.error(f"Unexpected error in verification: {e}")  # Use logging.error for debugging
+            return False
         return True
 
     async def _handle_verified_interaction(self, request: Request) -> JSONResponse:
@@ -275,7 +276,8 @@ class HTTPBot:
     async def __process_commands(self, request: Request, data: dict[str, Any]) -> JSONResponse:
         command_data = await self.___get_command_data(request, data)
         if not command_data:
-            raise UnknownCommand(f"Unknown command used")
+            error_message = f"Unknown command used: {data.get('data', {}).get('name', 'N/A')}"  # Add context to error
+            raise UnknownCommand(error_message)  # Raise with more details for better logging or handling upstream
         command = command_data.command
         interaction = command_data.interaction
         options = command_data.options_formatted
