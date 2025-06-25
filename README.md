@@ -6,9 +6,12 @@ A light weight feature-packed HTTP interactions API wrapper for Discord written 
 
 `pip install --update httpcord`
 
-## Support
-
-Discord server: https://discord.gg/yfY5XASZ85
+## Important items
+- [Get support for the project](.github/SUPPORT.md)
+- [Community code of conduct](.github/CODE_OF_CONDUCT.md)
+- [Contributor guidelines](.github/CONTRIBUTING.md)
+- [Report a security vulnerability](.github/SECURITY.md)
+- [See the projects governance](.github/GOVERNANCE.md)
 
 ## Examples
 
