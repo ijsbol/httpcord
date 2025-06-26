@@ -39,6 +39,7 @@ from httpcord.user import User
 
 
 __all__: Final[tuple[str, ...]] = (
+    "JSON",
     "JSONResponseError",
     "JSONResponseType",
     "TYPE_CONVERSION_TABLE",
@@ -46,6 +47,9 @@ __all__: Final[tuple[str, ...]] = (
     "Float",
     "String",
 )
+
+
+type JSON = dict[str, JSON] | list[JSON] | str | int | float | bool | None
 
 
 @dataclass(slots=True)

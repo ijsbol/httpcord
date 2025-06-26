@@ -36,6 +36,7 @@ from aiohttp import ClientSession
 from aiohttp.client_exceptions import ClientError
 
 from httpcord.file import File
+from httpcord.types import JSON
 
 
 class Route:
@@ -84,20 +85,20 @@ class Route:
         return _headers
 
     @property
-    def json(self) -> dict | None:
+    def json(self) -> JSON:
         """The JSON data to send with the route."""
         if self._json is None or len(self._files) > 0:
             return None
         return self._json
 
     @property
-    def data(self) -> dict | None:
+    def data(self) -> dict[str, str | bytes] | None:
         """The data to send with the route."""
 
         if len(self._files) == 0:
             return None
 
-        data: dict = {}
+        data: dict[str, str | bytes] = {}
         for idx, file in enumerate(self._files):
             data[f"files[{idx}]"] = file.read()
 
@@ -204,6 +205,6 @@ class HTTP:
             if logging.getLogger("httpcord").isEnabledFor(logging.DEBUG):
                 logging.getLogger("httpcord").debug(f"PATCH {route.url} returned {await resp.json()}")
         except ClientError as e:
-            raise RuntimeError(f"PATCH request failed: {e}")
+            raise RuntimeError(f"PATCH request failed: {e}") from e
         except Exception as e:
             raise RuntimeError(f"Unexpected error in PATCH: {e}")

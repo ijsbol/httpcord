@@ -1,5 +1,5 @@
 import datetime
-from typing import Final
+from typing import Final, TypedDict, NotRequired
 
 from httpcord.asset import Asset
 
@@ -13,11 +13,17 @@ __all__: tuple[str, ...] = (
 NUMBER_OF_DEFAULT_AVATARS: Final[int] = 6
 
 
+class AvatarDecorationData(TypedDict):
+    code: NotRequired[str]
+    expires_at: str | None
+    id: str | None
+
+
 class AvatarDecoration:
     __slots__: tuple[str, ...] = ("_data",)
 
-    def __init__(self, data: dict) -> None:
-        self._data: dict = data
+    def __init__(self, data: AvatarDecorationData) -> None:
+        self._data = data
 
     @property
     def asset(self) -> Asset | None:

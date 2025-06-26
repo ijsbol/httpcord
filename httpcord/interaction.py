@@ -28,6 +28,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Final,
+    NotRequired,
+    TypedDict,
 )
 
 from fastapi import Request
@@ -48,6 +50,11 @@ if TYPE_CHECKING:
 
 
 __all__: Final[tuple[str, ...]] = ("Interaction",)
+
+
+class InteractionDeferData(TypedDict):
+    type: int
+    data: NotRequired[dict[str, int]]
 
 
 class Resolved:
@@ -124,12 +131,12 @@ class Interaction[HTTPBotClient: HTTPBot = HTTPBot]:
         data: dict[str, Any],
         bot: HTTPBotClient,
     ) -> None:
-        self._data: dict = data
+        self._data: dict[str, Any] = data
         self._bot: HTTPBotClient = bot
         self._request: Request = request
         self._id = int(data["id"])
         self._token: str = data["token"]
-        self._channel = self._data["channel"]
+        self._channel = data["channel"]
         self._guild_id: str | None = data.get("guild_id")
         if data.get("member", None) is not None:
             assert self._guild_id is not None, "Guild ID must be present if member data is provided."
@@ -205,7 +212,7 @@ class Interaction[HTTPBotClient: HTTPBot = HTTPBot]:
         self._deferred = True
         self._responded = True
 
-        payload: dict = {
+        payload: InteractionDeferData = {
             "type": deferral_type.value,
         }
         if ephemeral:

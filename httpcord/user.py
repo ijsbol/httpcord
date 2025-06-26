@@ -23,10 +23,10 @@ SOFTWARE.
 """
 
 import datetime
-from typing import Final
+from typing import Any, Final
 
 from httpcord.asset import Asset
-from httpcord.avatar import NUMBER_OF_DEFAULT_AVATARS, AvatarDecoration
+from httpcord.avatar import NUMBER_OF_DEFAULT_AVATARS, AvatarDecoration, AvatarDecorationData
 
 
 __all__: tuple[str, ...] = ("User",)
@@ -41,7 +41,7 @@ class Nameplate:
         "_sku_id",
     )
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict[str, Any]) -> None:
         self._expires_at: datetime.datetime | None = (
             datetime.datetime.fromtimestamp(int(data["expires_at"]), tz=datetime.timezone.utc)
             if data["expires_at"] is not None
@@ -84,7 +84,7 @@ class Nameplate:
 class Collectibles:
     __slots__: Final[tuple[str, ...]] = ("_nameplate",)
 
-    def __init__(self, collectibles: dict | None) -> None:
+    def __init__(self, collectibles: dict[str, Any] | None) -> None:
         self._nameplate = Nameplate(collectibles["nameplate"]) if collectibles and "nameplate" in collectibles else None
 
     @property
@@ -101,7 +101,7 @@ class PrimaryGuild:
         "_tag",
     )
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict[str, Any]) -> None:
         self._badge: str | None = data.get("badge")
         self._identity_enabled: bool = data.get("identity_enabled", False)
         self._identity_guild_id: int | None = int(data["identity_guild_id"]) if "identity_guild_id" in data else None
@@ -147,12 +147,12 @@ class User:
         "_public_flags",
     )
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict[str, Any]) -> None:
         self._id: int = int(data["id"])
         self._avatar: str | None = data.get("avatar")
-        self._avatar_decoration: dict | None = data.get("avatar_decoration_data")
-        self._primary_guild: dict | None = data.get("primary_guild")
-        self._collectibles: dict[str, dict] | None = data.get("collectibles")
+        self._avatar_decoration: dict[str, Any] | None = data.get("avatar_decoration_data")
+        self._primary_guild: dict[str, Any] | None = data.get("primary_guild")
+        self._collectibles: dict[str, dict[str, Any]] | None = data.get("collectibles")
         self._global_name: str | None = data.get("global_name")
         self._public_flags: int = data.get("public_flags", 0)
         self._username: str = data["username"]
@@ -182,7 +182,7 @@ class User:
         """The avatar decoration."""
         if self._avatar_decoration is None:
             return None
-        return AvatarDecoration(self._avatar_decoration)
+        return AvatarDecoration(AvatarDecorationData(**self._avatar_decoration))
 
     @property
     def primary_guild(self) -> PrimaryGuild | None:

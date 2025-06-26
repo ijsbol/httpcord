@@ -159,7 +159,7 @@ class HTTPBot:
             name_localisations: LocaleDict | None = ...,
             description_localisations: LocaleDict | None = ...,
             option_localisations: dict[str, Locale] | None = ...,
-        ): ...
+        ) -> Callable[..., Any]: ...
 
         @overload
         def command(
@@ -175,7 +175,7 @@ class HTTPBot:
             name_localisations: LocaleDict | None = ...,
             description_localisations: LocaleDict | None = ...,
             option_localisations: dict[str, Locale] | None = ...,
-        ): ...
+        ) -> Callable[..., Any]: ...
 
     def command(
         self,

@@ -24,8 +24,23 @@ SOFTWARE.
 
 from __future__ import annotations
 
+from typing import TypedDict
+
 
 __all__: tuple[str, ...] = ("Attachment",)
+
+
+class AttachmentData(TypedDict):
+    content_type: str
+    filename: str
+    id: int
+    height: int
+    width: int
+    placeholder: bool
+    placeholder_version: int
+    proxy_url: str
+    size: int
+    url: str
 
 
 class Attachment:
@@ -44,7 +59,7 @@ class Attachment:
     )
 
     @classmethod
-    def from_option(cls, data: dict) -> Attachment:
+    def from_option(cls, data: AttachmentData) -> Attachment:
         return cls(
             content_type=data["content_type"],
             filename=data["filename"],

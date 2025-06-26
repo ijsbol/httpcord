@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import datetime
 from enum import IntEnum
-from typing import Literal, Union
+from typing import Any, Literal, Union
 
 from httpcord.asset import Asset
 from httpcord.user import User
@@ -69,7 +69,7 @@ class BaseChannel:
         "_last_pin_timestamp",
     )
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict[str, Any]) -> None:
         self._data = data
         self._id: int = int(data["id"])
         self._flags: int = data.get("flags", 0)
@@ -103,7 +103,7 @@ class BaseChannel:
         return from_timestamp(self._last_pin_timestamp) if self._last_pin_timestamp else None
 
     @classmethod
-    def from_data(cls, data: dict) -> BaseChannel:
+    def from_data(cls, data: dict[str, Any]) -> BaseChannel:
         """Create a channel instance from raw data."""
         channel_type = ChannelType(data["type"])
         if channel_type == ChannelType.DM:
@@ -129,7 +129,7 @@ class GuildChannel(BaseChannel):
         "_parent_id",
     )
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict[str, Any]) -> None:
         super().__init__(data)
         self._name: str = data["name"]
         self._topic: str | None = data.get("topic")
@@ -137,7 +137,7 @@ class GuildChannel(BaseChannel):
         self._rate_limit_per_user: int | None = data.get("rate_limit_per_user", None)
         self._guild_id: int = int(data["guild_id"])
         self._position: int = data.get("position", 0)
-        self._permission_overwrites: list[dict] = data.get("permission_overwrites", [])
+        self._permission_overwrites: list[dict[str, Any]] = data.get("permission_overwrites", [])
         self._default_auto_archive_duration: int | None = data.get("default_auto_archive_duration", None)
 
     @property
@@ -171,7 +171,7 @@ class GuildChannel(BaseChannel):
         return self._position
 
     @property
-    def permission_overwrites(self) -> list[dict]:
+    def permission_overwrites(self) -> list[dict[str, Any]]:
         """The permission overwrites for the channel."""
         return self._permission_overwrites
 
@@ -189,9 +189,9 @@ class GuildChannel(BaseChannel):
 class DMChannel(BaseChannel):
     __slots__: tuple[str, ...] = ("_recipients",)
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict[str, Any]) -> None:
         super().__init__(data)
-        self._recipients: list[dict] = data.get("recipients", [])
+        self._recipients: list[dict[str, Any]] = data.get("recipients", [])
 
     @property
     def type(self) -> Literal[ChannelType.DM]:
@@ -211,7 +211,7 @@ class GroupDMChannel(DMChannel):
         "_owner_id",
     )
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict[str, Any]) -> None:
         super().__init__(data)
         self._name: str = data["name"]
         self._icon: str | None = data.get("icon")
